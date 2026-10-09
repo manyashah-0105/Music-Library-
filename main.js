@@ -1,107 +1,206 @@
+
 (() => {
   'use strict';
-  const $ = (s, r = document) => r.querySelector(s);
-  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
-  const tracks = [
-    { n: '01', t: 'Kesariya ( From” Brahmastra”)', l: 'Hindi', c: '#a29bfe' },
-    { n: '02', t: 'Tu khub mane game che', l: 'Devotional', c: '#fd79a8' },
-    { n: '03', t: 'Khalasi', l: 'Gujarati', c: '#c6e94c' },
-    { n: '04', t: 'Booma Boom', l: 'Gujarati', c: '#b7d93e' },
-    { n: '05', t: 'Chaleya ( From “Jawan “)', l: 'Hindi', c: '#7b6fd6' }
-  ];
-  const list = $('#songs');
-  const audio = new Audio();
-  const played = new Set(); let tab = 'All', query = '';
-  let cur = 0, playing = false, shuffle = false, repeat = false;
 
-  list.innerHTML = tracks.map((k, i) => `
-    <li class="row${i === 0 ? ' is-active' : ''}" data-i="${i}" tabindex="0">
-      <span class="num">${k.n}</span>
-      <span class="art" style="--c:${k.c}" aria-hidden="true"><b></b><i></i><em>T0</em></span>
-      <div class="info"><strong>${k.t}</strong><span>Manya’s Playlist</span></div>
-      <span class="lang">${k.l}</span><span class="dur">—</span>
-      <button class="icon-btn like" aria-pressed="false" aria-label="Like song"><svg class="ic" width="18" height="18"><use href="#i-heart"/></svg></button>
-      <button class="row-play" aria-label="Play Track ${k.n}"><svg class="ic" width="14" height="14"><use href="#i-play"/></svg></button>
-    </li>`).join('');
-  const rows = $$('.row', list);
+  // Kesariya audio file — keep it in the same folder as index.html
+  const kesariyaAudio = new Audio('Kesariya.mp3');
+  kesariyaAudio.preload = 'metadata';
 
-  const fmt = s => isFinite(s) ? Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart(2, '0') : '0:00';
-  function render() {
-    rows.forEach((r, i) => {
-      r.classList.toggle('is-active', i === cur);
-      $('.row-play use', r).setAttribute('href', i === cur && playing ? '#i-pause' : '#i-play');
-    });
-    const k = tracks[cur];
-    $('#pTitle').textContent = k.t;
-    $('#pArt').style.setProperty('--c', k.c);
-    $('#pLike').setAttribute('aria-pressed', $('.like', rows[cur]).getAttribute('aria-pressed'));
-    $('#bPlay use').setAttribute('href', playing ? '#i-pause' : '#i-play');
-    $('#bPlay').setAttribute('aria-label', playing ? 'Pause' : 'Play');
+  const $ = (selector, root = document) => root.querySelector(selector);
+  const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
+
+  const songRows = $$('#songs .row');
+  const playButton = $('#bPlay');
+  const nextButton = $('#bNext');
+  const previousButton = $('#bPrev');
+  const seekBar = $('#seek');
+  const currentTimeLabel = $('#tCur');
+  const remainingTimeLabel = $('#tRem');
+
+  let currentIndex = -1;
+  let isPlaying = false;
+
+  const formatTime = seconds => {
+    if (!Number.isFinite(seconds)) return '0:00';
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${String(secs).padStart(2, '0')}`;
+  };
+
+  function updatePlayerInfo(row) {
+    if (!row) return;
+
+    const title = row.querySelector('.info strong');
+    const subtitle = row.querySelector('.info span');
+    const artwork = row.querySelector('.art');
+
+    if ($('#pTitle') && title) {
+      $('#pTitle').textContent = title.textContent;
+    }
+
+    // Display the song language/category in the bottom player.
+    if ($('#pSub')) {
+      const language = row.querySelector('.lang');
+      $('#pSub').textContent = language?.textContent.trim() || 'Hindi';
+    }
+
+    if ($('#pArt') && artwork) {
+      const color = getComputedStyle(artwork).getPropertyValue('--c');
+      $('#pArt').style.setProperty('--c', color);
+    }
   }
-  function select(i, play) {
-    cur = (i + tracks.length) % tracks.length;
-    if (play !== undefined) playing = play;
-    if (playing) played.add(cur);
-    render(); applyFilter();
+
+  function updatePlayButton() {
+    const icon = playButton?.querySelector('use');
+    if (icon) icon.setAttribute('href', isPlaying ? '#i-pause' : '#i-play');
+    playButton?.setAttribute('aria-label', isPlaying ? 'Pause' : 'Play');
   }
-  const next = () => select(shuffle ? Math.floor(Math.random() * tracks.length) : cur + 1);
-  rows.forEach((r, i) => {
-    const toggle = () => select(i, i === cur ? !playing : true);
-    r.addEventListener('click', e => {
-      const like = e.target.closest('.like');
-      if (like) { like.setAttribute('aria-pressed', like.getAttribute('aria-pressed') !== 'true'); if (i === cur) render(); applyFilter(); return; }
-      toggle();
+
+  function updateActiveRow() {
+    songRows.forEach((row, index) => {
+      row.classList.toggle('is-active', index === currentIndex);
+      const icon = row.querySelector('.row-play use');
+      if (icon) {
+        icon.setAttribute(
+          'href',
+          index === currentIndex && isPlaying ? '#i-pause' : '#i-play'
+        );
+      }
     });
-    r.addEventListener('keydown', e => { if (e.target === r && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); toggle(); } });
+  }
+
+  async function playSong(index) {
+    if (!songRows.length) return;
+
+    if (index < 0) index = 0;
+    if (index >= songRows.length) index = 0;
+
+    const row = songRows[index];
+    const title = row.querySelector('.info strong')?.textContent.trim() || '';
+
+    // This audio file is connected to Kesariya only.
+    if (!/kesariya/i.test(title)) {
+      kesariyaAudio.pause();
+      isPlaying = false;
+      currentIndex = index;
+      updatePlayerInfo(row);
+      updateActiveRow();
+      updatePlayButton();
+      alert('Audio has not been added for this song yet.');
+      return;
+    }
+
+    currentIndex = index;
+    updatePlayerInfo(row);
+
+    try {
+      await kesariyaAudio.play();
+      isPlaying = true;
+    } catch (error) {
+      isPlaying = false;
+      console.error('Could not play Kesariya:', error);
+      alert('Could not play Kesariya. Check that Kesariya.mp3 is in the same folder as index.html.');
+    }
+
+    updateActiveRow();
+    updatePlayButton();
+  }
+
+  function pauseSong() {
+    kesariyaAudio.pause();
+    isPlaying = false;
+    updateActiveRow();
+    updatePlayButton();
+  }
+
+  // Clicking a song or its row play button.
+  songRows.forEach((row, index) => {
+    row.addEventListener('click', event => {
+      if (event.target.closest('.like')) return;
+
+      if (index === currentIndex && isPlaying) {
+        pauseSong();
+      } else {
+        playSong(index);
+      }
+    });
   });
-  $('#bPlay').onclick = () => { playing = !playing; if (playing) played.add(cur); render(); applyFilter(); };
-  $('#bNext').onclick = next;
-  $('#bPrev').onclick = () => select(cur - 1);
-  $('#pLike').onclick = () => $('.like', rows[cur]).click();
-  const flip = (b, f) => b.addEventListener('click', () => { const on = b.getAttribute('aria-pressed') !== 'true'; b.setAttribute('aria-pressed', on); f(on); });
-  flip($('#bShuffle'), v => shuffle = v);
-  flip($('#bRepeat'), v => repeat = v);
-  flip($('#offline'), () => {});
-  flip($('#mute'), m => { $('#mute use').setAttribute('href', m ? '#i-mute' : '#i-volume'); audio.muted = m; });
-  $('#shuffleAll').onclick = () => select(Math.floor(Math.random() * tracks.length), true);
-  $('#vol').oninput = e => { audio.volume = e.target.value / 100; };
-  $('#seek').oninput = e => { if (audio.duration) audio.currentTime = audio.duration * e.target.value / 100; };
-  audio.ontimeupdate = () => {
-    $('#tCur').textContent = fmt(audio.currentTime);
-    $('#tRem').textContent = '-' + fmt(audio.duration - audio.currentTime);
-    $('#seek').value = audio.duration ? audio.currentTime / audio.duration * 100 : 0;
-  };
-  audio.onended = () => repeat ? (audio.currentTime = 0, audio.play()) : next();
-  $('#full').onclick = () => document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen?.();
-  function applyFilter() {
-    let n = 0;
-    rows.forEach((r, i) => {
-      const k = tracks[i], liked = $('.like', r).getAttribute('aria-pressed') === 'true';
-      const byTab = tab === 'All' || tab === k.l || (tab === 'Liked Songs' && liked) || (tab === 'Recently Played' && played.has(i));
-      const byText = !query || (k.t + ' ' + k.l).toLowerCase().includes(query);
-      r.hidden = !(byTab && byText); n += !r.hidden;
-    });
-    $('#albumCount').textContent = n + (n === 1 ? ' track' : ' tracks') + ' in this album';
-    $('#empty').hidden = n > 0;
-  }
-  $$('.tab').forEach(t => t.addEventListener('click', () => {
-    tab = t.textContent.trim(); $('h1').textContent = tab;
-    $$('.tab').forEach(x => x.setAttribute('aria-selected', x === t)); applyFilter();
-  }));
-  $$('.nav .nav-btn').forEach(b => b.addEventListener('click', () => $$('.nav .nav-btn').forEach(x => { x.classList.toggle('is-active', x === b); x.toggleAttribute('aria-current', x === b); })));
-  $('#search').addEventListener('input', e => { query = e.target.value.trim().toLowerCase(); applyFilter(); });
-  const side = $('#sidebar'), mb = $('#menuBtn'), bd = $('#backdrop');
-  const menu = open => {
-    side.classList.toggle('is-open', open); bd.hidden = !open;
-    mb.setAttribute('aria-expanded', open);
-    mb.setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation');
-    document.body.classList.toggle('no-scroll', open);
-    (open ? $('.nav-btn', side) : mb).focus();
-  };
-  mb.onclick = () => menu(!side.classList.contains('is-open'));
-  bd.onclick = () => menu(false);
-  document.addEventListener('keydown', e => { if (e.key === 'Escape' && side.classList.contains('is-open')) menu(false); });
-  $$('.nav-btn', side).forEach(b => b.addEventListener('click', () => { if (side.classList.contains('is-open')) menu(false); }));
-  matchMedia('(min-width:1001px)').addEventListener('change', e => { if (e.matches && side.classList.contains('is-open')) menu(false); });
-  render();
+
+  // Main bottom player controls.
+  playButton?.addEventListener('click', () => {
+    if (isPlaying) {
+      pauseSong();
+    } else {
+      playSong(currentIndex < 0 ? 0 : currentIndex);
+    }
+  });
+
+  nextButton?.addEventListener('click', () => {
+    playSong(currentIndex < 0 ? 0 : currentIndex + 1);
+  });
+
+  previousButton?.addEventListener('click', () => {
+    if (kesariyaAudio.currentTime > 3 && currentIndex === 0) {
+      kesariyaAudio.currentTime = 0;
+    } else {
+      playSong(currentIndex <= 0 ? 0 : currentIndex - 1);
+    }
+  });
+
+  // Seek/progress bar.
+  seekBar?.addEventListener('input', () => {
+    if (Number.isFinite(kesariyaAudio.duration)) {
+      kesariyaAudio.currentTime =
+        (Number(seekBar.value) / 100) * kesariyaAudio.duration;
+    }
+  });
+
+  // Volume control.
+  $('#vol')?.addEventListener('input', event => {
+    kesariyaAudio.volume = Number(event.target.value) / 100;
+  });
+
+  // Mute button.
+  $('#mute')?.addEventListener('click', event => {
+    kesariyaAudio.muted = !kesariyaAudio.muted;
+    event.currentTarget.setAttribute('aria-pressed', kesariyaAudio.muted);
+    const icon = event.currentTarget.querySelector('use');
+    if (icon) icon.setAttribute('href', kesariyaAudio.muted ? '#i-mute' : '#i-volume');
+  });
+
+  // Update duration and progress.
+  kesariyaAudio.addEventListener('loadedmetadata', () => {
+    const duration = formatTime(kesariyaAudio.duration);
+    const durationCell = songRows[0]?.querySelector('.dur');
+    if (durationCell) durationCell.textContent = duration;
+    if (remainingTimeLabel) {
+      remainingTimeLabel.textContent = '-' + duration;
+    }
+  });
+
+  kesariyaAudio.addEventListener('timeupdate', () => {
+    if (currentTimeLabel) {
+      currentTimeLabel.textContent = formatTime(kesariyaAudio.currentTime);
+    }
+
+    if (remainingTimeLabel) {
+      remainingTimeLabel.textContent = '-' + formatTime(
+        kesariyaAudio.duration - kesariyaAudio.currentTime
+      );
+    }
+
+    if (seekBar && Number.isFinite(kesariyaAudio.duration)) {
+      seekBar.value = kesariyaAudio.duration
+        ? (kesariyaAudio.currentTime / kesariyaAudio.duration) * 100
+        : 0;
+    }
+  });
+
+  kesariyaAudio.addEventListener('ended', () => {
+    isPlaying = false;
+    updateActiveRow();
+    updatePlayButton();
+  });
+
+  updatePlayButton();
 })();
