@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Music library</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="i-search" viewBox="0 0 15 16"><g stroke-width="1.09575"><path d="M6.696 12.261a4.87 4.87 0 1 0 0-9.74 4.87 4.87 0 0 0 0 9.74ZM12.784 13.479l-2.648-2.648"/></g></symbol>
+<symbol id="i-eq" viewBox="0 0 14 14"><g stroke-width="1.16667"><path d="M2.333 12.25V8.167M2.333 5.833V1.75M7 12.25V7M7 4.667V1.75M11.667 12.25V9.333M11.667 7V1.75M.583 8.167h3.5M5.25 4.667h3.5M9.917 9.333h3.5"/></g></symbol>
+<symbol id="i-clock" viewBox="0 0 14 14"><g stroke-width="1.16667"><path d="M7 12.833A5.833 5.833 0 1 0 7 1.167a5.833 5.833 0 0 0 0 11.666ZM7 3.5V7l2.333 1.167"/></g></symbol>
+<symbol id="i-more" viewBox="0 0 18 18"><g stroke-width="1.5"><circle cx="9" cy="9" r=".75"/><circle cx="14.25" cy="9" r=".75"/><circle cx="3.75" cy="9" r=".75"/></g></symbol>
+<symbol id="i-upload" viewBox="0 0 16 16"><g stroke-width="1.33333"><path d="M8 10.667v-8M11.333 6 8 2.667 4.667 6M2.667 13.333h10.666"/></g></symbol>
+<symbol id="i-shuffle-d" viewBox="0 0 14 14"><g stroke-width="1.16667"><path d="M9.333 1.75h2.917v2.917M2.333 11.667 12.25 1.75M12.25 9.333v2.917H9.333M8.75 8.75l3.5 3.5"/></g></symbol>
+<symbol id="i-download" viewBox="0 0 14 14"><g stroke-width="1.16667"><path d="M12.25 8.75v2.333a1.167 1.167 0 0 1-1.167 1.167H2.917a1.167 1.167 0 0 1-1.167-1.167V8.75M4.083 5.833 7 8.75l2.917-2.917M7 8.75v-7"/></g></symbol>
+<symbol id="i-heart" viewBox="0 0 18 18"><g stroke-width="1.35"><path d="M15.6 6.525c0 4.125-6.6 7.725-6.6 7.725S2.4 10.65 2.4 6.525a3.4 3.4 0 0 1 .622-2.254 3.45 3.45 0 0 1 1.896-1.368 3.47 3.47 0 0 1 2.335.118A3.45 3.45 0 0 1 9 4.575a3.45 3.45 0 0 1 1.747-1.553 3.47 3.47 0 0 1 2.335-.119 3.45 3.45 0 0 1 1.896 1.368A3.4 3.4 0 0 1 15.6 6.525Z"/></g></symbol>
+<symbol id="i-play" viewBox="0 0 16 16"><path d="M5.04 3.15 11.97 7.56 5.04 11.97V3.15Z" fill="currentColor" stroke-width="1.26"/></symbol>
+<symbol id="i-pause" viewBox="0 0 16 16"><path d="M5 3.5v8M10.5 3.5v8" stroke-width="2"/></symbol>
+<symbol id="i-music" viewBox="0 0 18 18"><g stroke-width="1.35"><path d="M6.75 13.5V3.75L15 2.25V12M6.75 13.5a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0ZM15 12a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z"/></g></symbol>
+<symbol id="i-playcircle" viewBox="0 0 18 18"><g stroke-width="1.35"><path d="M9 16.5a7.5 7.5 0 1 0 0-15 7.5 7.5 0 0 0 0 15ZM7.5 6l4.5 3-4.5 3V6Z"/></g></symbol>
+<symbol id="i-playtri" viewBox="0 0 18 18"><g stroke-width="1.35"><path d="M3.75 2.25 14.25 9l-10.5 6.75V2.25Z"/></g></symbol>
+<symbol id="i-settings" viewBox="0 0 18 18"><g stroke-width="1.35"><circle cx="9" cy="9" r="2.25"/><path d="M14.55 11.25a1.24 1.24 0 0 0 .248 1.365l.045.045a1.504 1.504 0 1 1-2.123 2.123l-.045-.045a1.24 1.24 0 0 0-1.365-.248 1.24 1.24 0 0 0-.75 1.133v.127a1.5 1.5 0 0 1-3 0v-.068a1.24 1.24 0 0 0-.81-1.132 1.24 1.24 0 0 0-1.365.248l-.045.045a1.504 1.504 0 1 1-2.123-2.123l.045-.045a1.24 1.24 0 0 0 .248-1.365 1.24 1.24 0 0 0-1.133-.75H2.25a1.5 1.5 0 0 1 0-3h.068a1.24 1.24 0 0 0 1.132-.81 1.24 1.24 0 0 0-.248-1.365l-.045-.045a1.504 1.504 0 1 1 2.123-2.123l.045.045a1.24 1.24 0 0 0 1.365.248h.06a1.24 1.24 0 0 0 .75-1.133V2.25a1.5 1.5 0 0 1 3 0v.068a1.24 1.24 0 0 0 .75 1.132 1.24 1.24 0 0 0 1.365-.248l.045-.045a1.504 1.504 0 1 1 2.123 2.123l-.045.045a1.24 1.24 0 0 0-.248 1.365v.06a1.24 1.24 0 0 0 1.133.75h.127a1.5 1.5 0 0 1 0 3h-.068a1.24 1.24 0 0 0-1.132.75Z"/></g></symbol>
+<symbol id="i-shuffle" viewBox="0 0 16 16"><g stroke-width="1.2"><path d="M2 4h2c2.667 0 3.333 8 6 8h4M12 14l2-2-2-2M2 12h2c1 0 1.667-.8 2.333-2M10 4h4M12 6l2-2-2-2"/></g></symbol>
+<symbol id="i-repeat" viewBox="0 0 16 16"><g stroke-width="1.2"><path d="m11.333 6.667 2.667-2.667-2.667-2.667M14 4H4a2 2 0 0 0-2 2v1.333M4.667 9.333 2 12l2.667 2.667M2 12h10a2 2 0 0 0 2-2V8.667"/></g></symbol>
+<symbol id="i-bars" viewBox="0 0 15 15"><g stroke-width="1.125"><path d="M2.5 13.125V8.75M2.5 6.25V1.875M7.5 13.125V7.5M7.5 5V1.875M12.5 13.125V10M12.5 7.5V1.875"/></g></symbol>
+<symbol id="i-clock15" viewBox="0 0 15 15"><g stroke-width="1.125"><path d="M7.5 13.75a6.25 6.25 0 1 0 0-12.5 6.25 6.25 0 0 0 0 12.5ZM7.5 3.75V7.5l2.5 1.25"/></g></symbol>
+<symbol id="i-volume" viewBox="0 0 17 17"><g stroke-width="1.275"><path d="M7.792 3.542 4.25 6.375H1.417v4.25H4.25l3.542 2.833V3.542ZM11.008 5.993a3.5 3.5 0 0 1 0 5.008M13.508 3.492a7.05 7.05 0 0 1 0 10.016"/></g></symbol>
+<symbol id="i-mute" viewBox="0 0 17 17"><g stroke-width="1.275"><path d="M7.792 3.542 4.25 6.375H1.417v4.25H4.25l3.542 2.833V3.542ZM11 6l4 5M15 6l-4 5"/></g></symbol>
+<symbol id="i-expand" viewBox="0 0 16 16"><g stroke-width="1.2"><path d="M10 2h4v4M6 14H2v-4M14 2 9.333 6.667M2 14l4.667-4.667"/></g></symbol>
+</defs></svg>
+
+<nav class="sidebar" aria-label="Sidebar navigation">
+  <div class="brand"><span class="logo" aria-hidden="true">MS</span></div>
+  <p class="eyebrow-nav">Your library</p>
+  <div class="nav" role="list">
+    <button class="nav-btn is-active" aria-current="page"><svg class="ic" width="18" height="18"><use href="#i-music"/></svg><span>All Tracks</span></button>
+    <button class="nav-btn"><svg class="ic" width="18" height="18"><use href="#i-playcircle"/></svg><span>Manya ‘s Playlist </span><span class="count">5</span></button>
+    <button class="nav-btn"><svg class="ic" width="18" height="18"><use href="#i-heart"/></svg><span>Liked Songs</span></button>
+    <button class="nav-btn"><svg class="ic" width="18" height="18"><use href="#i-playtri"/></svg><span>Now Playing</span></button>
+  </div>
+  <div class="side-bottom">
+    <button class="eq-box" id="eqBox" aria-label="Sound EQ preset: Flat"><span>Sound EQ</span><span class="badge">Flat</span></button>
+    <button class="nav-btn"><svg class="ic" width="18" height="18"><use href="#i-settings"/></svg><span>Settings</span></button>
+    <div class="storage"><p>LIBRARY STORAGE</p><div class="bar"><i></i></div><small>38 tracks indexed</small></div>
+  </div>
+</nav>
+
+<main class="main">
+  <header class="topbar">
+    <label class="search"><svg class="ic" width="15" height="16"><use href="#i-search"/></svg><input id="search" type="search" placeholder="Search your library..." aria-label="Search your library"></label>
+    <div class="top-actions">
+      <button class="pill"><svg class="ic" width="14" height="14"><use href="#i-eq"/></svg><span id="eqLabel">EQ: Flat</span></button>
+      <button class="pill"><svg class="ic" width="14" height="14"><use href="#i-clock"/></svg><span>Timer</span></button>
+      <button class="avatar" aria-label="Profile">MS</button>
+    </div>
+  </header>
+
+  <section class="content">
+    <div class="heading">
+      <div><p class="eyebrow">Collection / 2026</p><h1>All</h1><p class="sub" id="albumCount">5 tracks in this album</p></div>
+      <button class="round-btn" aria-label="More library options"><svg class="ic" width="18" height="18"><use href="#i-more"/></svg></button>
+    </div>
+    <div class="tabs" role="tablist" aria-label="Filter row chips">
+      <button class="tab" role="tab" aria-selected="true">All</button><button class="tab" role="tab" aria-selected="false">Jivan Ni Pagdhare</button><button class="tab" role="tab" aria-selected="false">Trikal Sandhya</button><button class="tab" role="tab" aria-selected="false">Devotional</button><button class="tab" role="tab" aria-selected="false">Liked Songs</button><button class="tab" role="tab" aria-selected="false">Recently Played</button>
+    </div>
+    <div class="actionbar">
+      <div class="actions">
+        <button class="btn btn-primary"><svg class="ic" width="16" height="16"><use href="#i-upload"/></svg>Scan folder</button>
+        <button class="btn" id="shuffleAll"><svg class="ic" width="14" height="14"><use href="#i-shuffle-d"/></svg>Shuffle</button>
+        <button class="btn" id="offline" aria-pressed="false"><svg class="ic" width="14" height="14"><use href="#i-download"/></svg>Save for offline drive</button>
+      </div>
+      <span class="total">38 tracks</span>
+    </div>
+    <ul class="songs" id="songs"></ul>
+  </section>
+</main>
+
+<footer class="player" aria-label="Audio player">
+  <div class="p-left">
+    <span class="art art-52" id="pArt" aria-hidden="true"><b></b><i></i><em>T0</em></span>
+    <div class="p-meta"><strong id="pTitle">Track 01</strong><span id="pSub">Jivan Ni Pagdhare</span></div>
+    <button class="icon-btn like" id="pLike" aria-pressed="false" aria-label="Like current song"><svg class="ic" width="18" height="18"><use href="#i-heart"/></svg></button>
+  </div>
+  <div class="p-center">
+    <div class="controls">
+      <button class="icon-btn sm" id="bShuffle" aria-pressed="false" aria-label="Toggle shuffle"><svg class="ic" width="16" height="16"><use href="#i-shuffle"/></svg></button>
+      <button class="icon-btn txt" id="bPrev" aria-label="Previous track">‹</button>
+      <button class="play-main" id="bPlay" aria-label="Play"><svg class="ic" width="20" height="20"><use href="#i-play"/></svg></button>
+      <button class="icon-btn txt" id="bNext" aria-label="Next track">›</button>
+      <button class="icon-btn sm" id="bRepeat" aria-pressed="false" aria-label="Toggle repeat"><svg class="ic" width="16" height="16"><use href="#i-repeat"/></svg></button>
+    </div>
+    <div class="seek"><span class="time" id="tCur">0:00</span><div class="track"><img src="assets/img/progress-track.png" alt=""><input id="seek" type="range" min="0" max="100" value="0" aria-label="Track progress"></div><span class="time" id="tRem">-0:00</span></div>
+  </div>
+  <div class="p-right">
+    <button class="icon-btn sm" aria-label="Equalizer"><svg class="ic" width="15" height="15"><use href="#i-bars"/></svg></button>
+    <button class="icon-btn sm" aria-label="Sleep timer"><svg class="ic" width="15" height="15"><use href="#i-clock15"/></svg></button>
+    <div class="vol"><button class="icon-btn vbtn" id="mute" aria-pressed="false" aria-label="Mute or unmute"><svg class="ic" width="17" height="17"><use href="#i-volume"/></svg></button><input id="vol" type="range" min="0" max="100" value="100" aria-label="Volume level"></div>
+    <button class="icon-btn sm" id="full" aria-label="View fullscreen"><svg class="ic" width="16" height="16"><use href="#i-expand"/></svg></button>
+  </div>
+</footer>
+<script src="js/main.js"></script>
+</body>
+</html>
