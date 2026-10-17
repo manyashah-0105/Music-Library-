@@ -1,107 +1,192 @@
-(() => {
-  'use strict';
-  const $ = (s, r = document) => r.querySelector(s);
-  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
-  const tracks = [
-    { n: '01', t: 'Kesariya ( From” Brahmastra”)', l: 'Hindi', c: '#a29bfe' },
-    { n: '02', t: 'Tu khub mane game che', l: 'Devotional', c: '#fd79a8' },
-    { n: '03', t: 'Khalasi', l: 'Gujarati', c: '#c6e94c' },
-    { n: '04', t: 'Booma Boom', l: 'Gujarati', c: '#b7d93e' },
-    { n: '05', t: 'Chaleya ( From “Jawan “)', l: 'Hindi', c: '#7b6fd6' }
-  ];
-  const list = $('#songs');
-  const audio = new Audio();
-  const played = new Set(); let tab = 'All', query = '';
-  let cur = 0, playing = false, shuffle = false, repeat = false;
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+const au = $("#au");
+const P = {
+  note: '<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',
+  heart: '<path d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 000-7.8z"/>',
+  play: '<path d="M7 4l13 8-13 8z" fill="currentColor"/>',
+  pause: '<path d="M7 4h3.5v16H7zM13.5 4H17v16h-3.5z" fill="currentColor"/>',
+  tri: '<path d="M7 4l13 8-13 8z"/>',
+  circleplay: '<circle cx="12" cy="12" r="9"/><path d="M10 8l6 4-6 4z"/>',
+  shuffle: '<path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/>',
+  repeat: '<path d="M17 1l4 4-4 4M3 11V9a4 4 0 014-4h14M7 23l-4-4 4-4M21 13v2a4 4 0 01-4 4H3"/>',
+  prev: '<path d="M15 5l-7 7 7 7"/>', next: '<path d="M9 5l7 7-7 7"/>',
+  search: '<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>',
+  sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+  moon: '<path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/>',
+  vol: '<path d="M11 5L6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 010 7M19 5a10 10 0 010 14"/>',
+  mute: '<path d="M11 5L6 9H2v6h4l5 4z"/><path d="M22 9l-6 6M16 9l6 6"/>',
+  share: '<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/>',
+  eq: '<path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/>',
+  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  gear: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/>',
+  dots: '<circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/>',
+  upload: '<path d="M12 16V4M7 9l5-5 5 5M4 20h16"/>', download: '<path d="M12 4v12M7 11l5 5 5-5M4 20h16"/>',
+  expand: '<path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>'
+};
+const svg = n => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${P[n]}</svg>`;
+const paint = () => $$("[data-i]").forEach(e => e.innerHTML = svg(e.dataset.i));
 
-  list.innerHTML = tracks.map((k, i) => `
-    <li class="row${i === 0 ? ' is-active' : ''}" data-i="${i}" tabindex="0">
-      <span class="num">${k.n}</span>
-      <span class="art" style="--c:${k.c}" aria-hidden="true"><b></b><i></i><em>T0</em></span>
-      <div class="info"><strong>${k.t}</strong><span>Manya’s Playlist</span></div>
-      <span class="lang">${k.l}</span><span class="dur">—</span>
-      <button class="icon-btn like" aria-pressed="false" aria-label="Like song"><svg class="ic" width="18" height="18"><use href="#i-heart"/></svg></button>
-      <button class="row-play" aria-label="Play Track ${k.n}"><svg class="ic" width="14" height="14"><use href="#i-play"/></svg></button>
-    </li>`).join('');
-  const rows = $$('.row', list);
+let cur = -1, tryN = 0, view = "all", chip = "All", query = "", shuf = false, rep = 0, recent = [];
+let liked = new Set();
+try { liked = new Set(JSON.parse(localStorage.getItem("liked") || "[]")); } catch (e) {}
+const save = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
+const fmt = t => isFinite(t) ? Math.floor(t / 60) + ":" + String(Math.floor(t % 60)).padStart(2, "0") : "0:00";
+const toast = m => { const t = $("#toast"); t.textContent = m; t.classList.add("show"); clearTimeout(toast.id); toast.id = setTimeout(() => t.classList.remove("show"), 4000); };
 
-  const fmt = s => isFinite(s) ? Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart(2, '0') : '0:00';
-  function render() {
-    rows.forEach((r, i) => {
-      r.classList.toggle('is-active', i === cur);
-      $('.row-play use', r).setAttribute('href', i === cur && playing ? '#i-pause' : '#i-play');
-    });
-    const k = tracks[cur];
-    $('#pTitle').textContent = k.t;
-    $('#pArt').style.setProperty('--c', k.c);
-    $('#pLike').setAttribute('aria-pressed', $('.like', rows[cur]).getAttribute('aria-pressed'));
-    $('#bPlay use').setAttribute('href', playing ? '#i-pause' : '#i-play');
-    $('#bPlay').setAttribute('aria-label', playing ? 'Pause' : 'Play');
-  }
-  function select(i, play) {
-    cur = (i + tracks.length) % tracks.length;
-    if (play !== undefined) playing = play;
-    if (playing) played.add(cur);
-    render(); applyFilter();
-  }
-  const next = () => select(shuffle ? Math.floor(Math.random() * tracks.length) : cur + 1);
-  rows.forEach((r, i) => {
-    const toggle = () => select(i, i === cur ? !playing : true);
-    r.addEventListener('click', e => {
-      const like = e.target.closest('.like');
-      if (like) { like.setAttribute('aria-pressed', like.getAttribute('aria-pressed') !== 'true'); if (i === cur) render(); applyFilter(); return; }
-      toggle();
-    });
-    r.addEventListener('keydown', e => { if (e.target === r && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); toggle(); } });
+/* ---------- list ---------- */
+function visible() {
+  return songs.map((s, i) => i).filter(i => {
+    const s = songs[i];
+    if (view === "liked" && !liked.has(i)) return false;
+    if (chip === "Liked Songs" && !liked.has(i)) return false;
+    if (chip === "Recently Played" && !recent.includes(i)) return false;
+    if (["Hindi", "Gujarati", "Devotional"].includes(chip) && s.cat !== chip) return false;
+    return (s.title + s.artist + s.cat + s.album).toLowerCase().includes(query);
   });
-  $('#bPlay').onclick = () => { playing = !playing; if (playing) played.add(cur); render(); applyFilter(); };
-  $('#bNext').onclick = next;
-  $('#bPrev').onclick = () => select(cur - 1);
-  $('#pLike').onclick = () => $('.like', rows[cur]).click();
-  const flip = (b, f) => b.addEventListener('click', () => { const on = b.getAttribute('aria-pressed') !== 'true'; b.setAttribute('aria-pressed', on); f(on); });
-  flip($('#bShuffle'), v => shuffle = v);
-  flip($('#bRepeat'), v => repeat = v);
-  flip($('#offline'), () => {});
-  flip($('#mute'), m => { $('#mute use').setAttribute('href', m ? '#i-mute' : '#i-volume'); audio.muted = m; });
-  $('#shuffleAll').onclick = () => select(Math.floor(Math.random() * tracks.length), true);
-  $('#vol').oninput = e => { audio.volume = e.target.value / 100; };
-  $('#seek').oninput = e => { if (audio.duration) audio.currentTime = audio.duration * e.target.value / 100; };
-  audio.ontimeupdate = () => {
-    $('#tCur').textContent = fmt(audio.currentTime);
-    $('#tRem').textContent = '-' + fmt(audio.duration - audio.currentTime);
-    $('#seek').value = audio.duration ? audio.currentTime / audio.duration * 100 : 0;
-  };
-  audio.onended = () => repeat ? (audio.currentTime = 0, audio.play()) : next();
-  $('#full').onclick = () => document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen?.();
-  function applyFilter() {
-    let n = 0;
-    rows.forEach((r, i) => {
-      const k = tracks[i], liked = $('.like', r).getAttribute('aria-pressed') === 'true';
-      const byTab = tab === 'All' || tab === k.l || (tab === 'Liked Songs' && liked) || (tab === 'Recently Played' && played.has(i));
-      const byText = !query || (k.t + ' ' + k.l).toLowerCase().includes(query);
-      r.hidden = !(byTab && byText); n += !r.hidden;
-    });
-    $('#albumCount').textContent = n + (n === 1 ? ' track' : ' tracks') + ' in this album';
-    $('#empty').hidden = n > 0;
+}
+function renderList() {
+  const ids = visible();
+  $("#list").innerHTML = ids.length ? ids.map((i, n) => {
+    const s = songs[i];
+    return `<div class="row${i === cur ? " on" : ""}" data-i="${i}"><span class="n">${String(n + 1).padStart(2, "0")}</span>
+      <div class="thumb">${svg("note")}</div><div><span class="rt">${s.title}</span><small>Manya’s Playlist</small></div>
+      <span class="cat">${s.cat}</span><span class="dur">—</span>
+      <button class="icon lk${liked.has(i) ? " liked" : ""}" data-lk="${i}" aria-label="Like song">${svg("heart")}</button>
+      <button class="rp" data-pp="${i}" aria-label="Play">${svg(i === cur && !au.paused ? "pause" : "play")}</button></div>`;
+  }).join("") : '<p class="empty">No songs here yet.</p>';
+  $("#count").textContent = ids.length + " tracks";
+  $("#sub").textContent = ids.length + " tracks in this album";
+}
+$("#list").addEventListener("click", e => {
+  const lk = e.target.closest("[data-lk]"); if (lk) return toggleLike(+lk.dataset.lk);
+  const row = e.target.closest(".row"); if (!row) return;
+  const i = +row.dataset.i;
+  if (i === cur) toggle(); else load(i, true);
+});
+
+/* ---------- playback ---------- */
+function setSrc() { au.src = encodeURI(songs[cur].files[tryN]); }
+function load(i, play) {
+  cur = i; tryN = 0; setSrc();
+  recent = [i, ...recent.filter(x => x !== i)].slice(0, 20);
+  if (play) au.play().catch(() => {});
+  ui();
+}
+au.addEventListener("error", () => {
+  if (cur < 0) return;
+  if (tryN < songs[cur].files.length - 1) { tryN++; setSrc(); au.play().catch(() => {}); }
+  else toast(`Can't load "${songs[cur].short}". Make a file name in songs.js match the uploaded mp3 exactly.`);
+});
+function toggle() { if (cur < 0) return load(visible()[0] ?? 0, true); au.paused ? au.play().catch(() => {}) : au.pause(); }
+function step(d) {
+  if (cur < 0) return load(0, true);
+  let n = shuf && songs.length > 1 ? (() => { let r; do r = Math.floor(Math.random() * songs.length); while (r === cur); return r; })()
+        : (cur + d + songs.length) % songs.length;
+  load(n, true);
+}
+au.addEventListener("ended", () => {
+  if (rep === 2) { au.currentTime = 0; au.play(); }
+  else if (rep === 1 || shuf || cur < songs.length - 1) step(1);
+});
+["play", "pause"].forEach(ev => au.addEventListener(ev, ui));
+function ui() {
+  const s = songs[cur], playing = !au.paused;
+  $$(".ppbtn").forEach(b => b.innerHTML = svg(playing ? "pause" : "play"));
+  $("#vinyl").classList.toggle("spin", playing);
+  $$(".shufbtn").forEach(b => b.classList.toggle("on", shuf));
+  $$(".repbtn").forEach(b => { b.classList.toggle("on", rep > 0); b.style.opacity = rep === 2 ? 1 : ""; b.title = ["Repeat off", "Repeat all", "Repeat one"][rep]; });
+  $("#shufBtn").classList.toggle("on", shuf);
+  if (s) {
+    $("#bTitle").textContent = s.title; $("#bCat").textContent = s.cat;
+    $("#nTitle").textContent = s.short; $("#nAlbum").textContent = s.album;
+    $("#nTags").textContent = [s.cat, s.artist, "Lossless Audio", "Flat EQ"].join("  •  ");
   }
-  $$('.tab').forEach(t => t.addEventListener('click', () => {
-    tab = t.textContent.trim(); $('h1').textContent = tab;
-    $$('.tab').forEach(x => x.setAttribute('aria-selected', x === t)); applyFilter();
-  }));
-  $$('.nav .nav-btn').forEach(b => b.addEventListener('click', () => $$('.nav .nav-btn').forEach(x => { x.classList.toggle('is-active', x === b); x.toggleAttribute('aria-current', x === b); })));
-  $('#search').addEventListener('input', e => { query = e.target.value.trim().toLowerCase(); applyFilter(); });
-  const side = $('#sidebar'), mb = $('#menuBtn'), bd = $('#backdrop');
-  const menu = open => {
-    side.classList.toggle('is-open', open); bd.hidden = !open;
-    mb.setAttribute('aria-expanded', open);
-    mb.setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation');
-    document.body.classList.toggle('no-scroll', open);
-    (open ? $('.nav-btn', side) : mb).focus();
-  };
-  mb.onclick = () => menu(!side.classList.contains('is-open'));
-  bd.onclick = () => menu(false);
-  document.addEventListener('keydown', e => { if (e.key === 'Escape' && side.classList.contains('is-open')) menu(false); });
-  $$('.nav-btn', side).forEach(b => b.addEventListener('click', () => { if (side.classList.contains('is-open')) menu(false); }));
-  matchMedia('(min-width:1001px)').addEventListener('change', e => { if (e.matches && side.classList.contains('is-open')) menu(false); });
-  render();
-})();
+  $$(".likebtn").forEach(b => b.classList.toggle("liked", liked.has(cur)));
+  renderList();
+}
+function toggleLike(i) {
+  liked.has(i) ? liked.delete(i) : liked.add(i);
+  save("liked", JSON.stringify([...liked])); ui();
+}
+
+/* ---------- progress bar ---------- */
+const seeks = $$(".seek");
+au.addEventListener("timeupdate", () => {
+  const d = au.duration, t = au.currentTime, v = d ? (t / d) * 1000 : 0;
+  seeks.forEach(s => { if (!s.dragging) { s.value = v; s.style.setProperty("--p", v / 10 + "%"); } });
+  $$(".tcur").forEach(e => e.textContent = fmt(t));
+  $$(".trem").forEach(e => e.textContent = "-" + fmt(d - t));
+});
+au.addEventListener("loadedmetadata", () => $$(".trem").forEach(e => e.textContent = "-" + fmt(au.duration)));
+seeks.forEach(s => {
+  s.addEventListener("pointerdown", () => s.dragging = true);
+  s.addEventListener("input", () => {
+    s.style.setProperty("--p", s.value / 10 + "%");
+    if (au.duration) au.currentTime = (s.value / 1000) * au.duration;
+  });
+  ["pointerup", "change"].forEach(ev => s.addEventListener(ev, () => s.dragging = false));
+});
+
+/* ---------- controls ---------- */
+$$(".ppbtn").forEach(b => b.onclick = toggle);
+$$(".prevbtn").forEach(b => b.onclick = () => (au.currentTime > 3 ? (au.currentTime = 0) : step(-1)));
+$$(".nextbtn").forEach(b => b.onclick = () => step(1));
+$$(".shufbtn").forEach(b => b.onclick = () => { shuf = !shuf; ui(); });
+$$(".repbtn").forEach(b => b.onclick = () => { rep = (rep + 1) % 3; ui(); });
+$$(".likebtn").forEach(b => b.onclick = e => { e.stopPropagation(); if (cur >= 0) toggleLike(cur); });
+$("#shufBtn").onclick = () => { shuf = true; const v = visible(); load(v[Math.floor(Math.random() * v.length)] ?? 0, true); };
+const vols = $$(".vol"), mutes = $$(".mute");
+function setVol(v) {
+  au.volume = v / 100; au.muted = v === 0;
+  vols.forEach(x => { x.value = v; x.style.setProperty("--p", v + "%"); });
+  mutes.forEach(m => m.innerHTML = svg(v === 0 ? "mute" : "vol"));
+}
+vols.forEach(v => v.oninput = () => setVol(+v.value));
+mutes.forEach(m => m.onclick = () => setVol(au.muted || au.volume === 0 ? 100 : 0));
+setVol(100);
+const speeds = [1, 1.25, 1.5, 2, 0.75];
+$(".speed").onclick = e => { const i = (speeds.indexOf(au.playbackRate) + 1) % speeds.length; au.playbackRate = au.defaultPlaybackRate = speeds[i]; e.target.textContent = speeds[i].toFixed(1) + "x"; };
+$("#share").onclick = () => {
+  const s = songs[cur] || songs[0];
+  navigator.share ? navigator.share({ title: s.short, url: location.href }).catch(() => {})
+    : navigator.clipboard?.writeText(location.href).then(() => toast("Link copied"));
+};
+$("#full").onclick = () => document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen?.();
+const times = [0, 30, 60, 120]; let ti = 0, tt;
+$("#timer").onclick = () => {
+  ti = (ti + 1) % times.length; clearTimeout(tt);
+  $("#timerT").textContent = times[ti] ? "Timer " + (times[ti] < 60 ? times[ti] + "m" : times[ti] / 60 + "h") : "Timer";
+  if (times[ti]) tt = setTimeout(() => { au.pause(); ti = 0; $("#timerT").textContent = "Timer"; }, times[ti] * 60000);
+};
+
+/* ---------- views, chips, search ---------- */
+const titles = { all: "All", list: "Manya’s Playlist", liked: "Liked Songs" };
+function show(v) {
+  const now = v === "now";
+  $("#now").classList.toggle("hidden", !now); $("#lib").classList.toggle("hidden", now);
+  document.body.classList.toggle("nowv", now);
+  if (!now) { view = v; $("#ttl").textContent = titles[v]; renderList(); }
+  $$("#nav button").forEach(b => b.classList.toggle("on", b.dataset.v === v));
+  scrollTo(0, 0);
+}
+$("#nav").onclick = e => { const b = e.target.closest("button"); if (b) show(b.dataset.v); };
+$("#back").onclick = () => show(view);
+$(".binfo").addEventListener("click", e => { if (!e.target.closest(".likebtn")) show("now"); });
+$("#openNow").onclick = () => show("now");
+$("#chips").innerHTML = ["All", "Hindi", "Gujarati", "Devotional", "Liked Songs", "Recently Played"].map((c, i) => `<button class="${i ? "" : "on"}">${c}</button>`).join("");
+$("#chips").onclick = e => {
+  const b = e.target.closest("button"); if (!b) return;
+  chip = b.textContent; $$("#chips button").forEach(x => x.classList.toggle("on", x === b)); renderList();
+};
+$("#q").oninput = e => { query = e.target.value.toLowerCase().trim(); if (!$("#lib").offsetParent) show(view); renderList(); };
+
+/* ---------- dark / light mode ---------- */
+function theme(t) {
+  document.documentElement.dataset.theme = t; save("theme", t);
+  $("#theme").innerHTML = svg(t === "dark" ? "sun" : "moon");
+  $("#theme").title = t === "dark" ? "Switch to light mode" : "Switch to dark mode";
+}
+$("#theme").onclick = () => theme(document.documentElement.dataset.theme === "dark" ? "light" : "dark");
+let saved = "dark"; try { saved = localStorage.getItem("theme") || "dark"; } catch (e) {}
+
+paint(); theme(saved); renderList(); ui();
