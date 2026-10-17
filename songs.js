@@ -1,17 +1,20 @@
-const BASE = "";
-
-const songList = [
-  { title: "Kesariya",              category: "Hindi",    file: "https://github.com/manyashah-0105/Music-Library-/blob/main/Kesariya%20-%20Brahm%C4%81stra%20Ranbir%20Kapoor%20Alia%20Bhatt%20Pritam%20Arijit%20Singh%20Amitabh%20Bhattacharya%204K.mp3" },
-  { title: "Tu khub mane game che", category: "Gujarati", file: "https://github.com/manyashah-0105/Music-Library-/blob/main/Tu%20Khub%20Mane%20Game%20Che%20Mara%20Valah%20Prabhu%20Flute%20Chronicle%20Jainam%20Varia.mp3" },
-  { title: "Khalasi",               category: "Gujarati", file: "https://github.com/manyashah-0105/Music-Library-/blob/main/Coke%20Studio%20Bharat%20Khalasi%20Aditya%20Gadhvi%20x%20Achint.mp3" },
-  { title: "Booma Boom",            category: "Hindi",    file: "https://github.com/manyashah-0105/Music-Library-/blob/main/Booma%20Boom%20(From%20Lagan%20Laagii%20Re%20).mp3" },
-  { title: "Chaleya",               category: "Hindi",    file: "https://github.com/manyashah-0105/Music-Library-/blob/main/JAWAN%20Chaleya%20(Hindi)%20Shah%20Rukh%20Khan%20Nayanthara%20Atlee%20Anirudh%20Arijit%20S%2C%20Shilpa%20R%20Kumaar.mp3" }
-].map((s, i) => {
-  const url = BASE + encodeURIComponent(s.file);
-  return { id: i, ...s, url, src: url, path: url, link: url, audio: url, liked: false };
-});
-
-const songs = songList;
-const tracks = songList;
-const playlist = songList;
-const songsData = songList;
+// Put your mp3 files in the SAME folder as index.html.
+// "files" = file names to try, in order. The first one that exists is used.
+// If a song won't play, make one of these names match your uploaded file exactly (capitals count).
+const songs = [
+  { title: "Kesariya ( From” Brahmastra”)", short: "Kesariya", album: "From “ Brahmastra ”",
+    artist: "Pritam, Arijit Singh", cat: "Hindi",
+    files: ["Kesariya.mp3", "Kesariya.MP3"] },
+  { title: "Tu khub mane game che", short: "Tu Khub Mane Game che", album: "Jain Songs",
+    artist: "Jainam Varia", cat: "Devotional",
+    files: ["Tu-khub-mane-game-che.mp3", "Tu khub mane game che.mp3", "Tu.khub.mane.game.che.mp3", "Tu_khub_mane_game_che.mp3"] },
+  { title: "Khalasi", short: "Khalasi", album: "Coke Studio",
+    artist: "Aditya Gadhvi", cat: "Gujarati",
+    files: ["Khalasi.mp3", "Khalasi.MP3"] },
+  { title: "Booma Boom", short: "Booma Boom", album: "From “Lagan Lagi Re ”",
+    artist: "Umesh Barot", cat: "Gujarati",
+    files: ["Booma-Boom.mp3", "Booma Boom.mp3", "Booma.Boom.mp3", "Booma_Boom.mp3"] },
+  { title: "Chaleya ( From “Jawan “)", short: "Chaleya", album: "From “Jawan ”",
+    artist: "Arijit Singh", cat: "Hindi",
+    files: ["Chaleya.mp3", "Chaleya.MP3"] }
+];
