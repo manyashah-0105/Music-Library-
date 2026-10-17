@@ -99,7 +99,7 @@ function ui() {
   if (s) {
     $("#bTitle").textContent = s.title; $("#bCat").textContent = s.cat;
     $("#nTitle").textContent = s.short; $("#nAlbum").textContent = s.album;
-    $("#nTags").textContent = [s.cat, s.artist, "Lossless Audio", "Flat EQ"].join("  •  ");
+    $("#nTags").innerHTML = [s.cat, s.artist, "Lossless Audio", "Flat EQ"].map(t => `<span>${t}</span>`).join("<em>•</em>");
   }
   $$(".likebtn").forEach(b => b.classList.toggle("liked", liked.has(cur)));
   renderList();
