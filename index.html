@@ -1,417 +1,114 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
-<meta charset="utf-8">
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Music library</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<style>
-/* =========================================================
-   Music library — mobile-first responsive stylesheet
-   Breakpoints: 480 | 701 (tablet) | 1001 (laptop) | 1281 (desktop = Figma 1920 design)
-   ========================================================= */
-:root{--bg:#000;--fg:#f3f4ed;--dim:#d8ddd3;--muted:#8c9087;--card:#151814;--border:#22271f;--line:#252823;--subtle:#1b1e1a;--cyan:#00c0e8;--glow:rgba(198,233,76,.28);--font:'Plus Jakarta Sans',system-ui,-apple-system,'Segoe UI',sans-serif;--sw:0px;--pad:16px}
-*,*::before,*::after{box-sizing:border-box;margin:0}
-html,body{background:var(--bg);color:var(--fg);font-family:var(--font);min-height:100%}
-body{position:relative;overflow-x:hidden}
-body.no-scroll{overflow:hidden}
-body::before{content:"";position:absolute;inset:0 0 auto 0;height:812px;z-index:0;pointer-events:none;background:radial-gradient(720px 487px at 75% 730.8px,#1c2516,rgba(28,37,22,0)),radial-gradient(815px 551px at 20% 162.4px,#151a13,rgba(21,26,19,0)),radial-gradient(789px 534px at 50% 609px,rgba(162,155,254,.106),rgba(162,155,254,0))}
-img{max-width:100%}
-button{font:inherit;color:inherit;cursor:pointer;background:none;border:0;transition:background .18s,border-color .18s,color .18s,transform .12s,filter .18s}
-button:active:not(:disabled){transform:scale(.96)}
-button:disabled{opacity:.45;cursor:not-allowed}
-:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
-.ic{display:block;fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round;flex:none}
-symbol#i-play path{fill:currentColor}
-
-/* ---------- Sidebar (drawer on small screens) ---------- */
-.sidebar{position:fixed;inset:0 auto 0 0;width:250px;max-width:85vw;z-index:20;display:flex;flex-direction:column;padding:24px 18px 20px;background:rgba(0,0,0,.96);border-right:1px solid var(--line);backdrop-filter:blur(10px);overflow:auto;transform:translateX(-100%);visibility:hidden;transition:transform .25s ease,visibility .25s}
-.sidebar.is-open{transform:none;visibility:visible;box-shadow:12px 0 40px rgba(0,0,0,.6)}
-.backdrop{position:fixed;inset:0;z-index:15;background:rgba(0,0,0,.6)}
-.backdrop[hidden]{display:none}
-.brand{padding-bottom:24px}
-.logo{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#d4f85e,var(--cyan));box-shadow:0 4px 8px var(--glow);color:#0c0d0c;font-size:13px;font-weight:800;letter-spacing:-.52px;text-transform:uppercase}
-.eyebrow-nav{padding:8px 10px 10px;font-size:10px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:#5c6258}
-.nav{flex:1;display:flex;flex-direction:column;gap:5px;padding:0 2px 16px 0;justify-content:center}
-.nav-btn{display:flex;align-items:center;gap:12px;width:100%;padding:10px 14px;border:1px solid transparent;border-radius:14px;font-size:13px;font-weight:600;color:#92988d;text-align:left}
-.nav-btn span:not(.count){white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.nav-btn:hover{background:#141812;color:var(--fg)}
-.nav-btn.is-active{background:#1a2016;border-color:rgba(198,233,76,.15);color:var(--cyan)}
-.count{margin-left:auto;padding:2px 6px;border-radius:8px;background:#1b2018;color:var(--muted);font-size:10px;font-weight:600}
-.side-bottom{display:flex;flex-direction:column;gap:12px;padding-top:12px;border-top:1px solid var(--subtle)}
-.eq-box{display:flex;justify-content:space-between;align-items:center;width:100%;padding:10px 14px;background:#141812;border:1px solid var(--border);border-radius:14px;font-size:12px;font-weight:600;color:var(--muted)}
-.eq-box:hover{border-color:#2f362b}
-.badge{padding:2px 7px;border-radius:10px;background:var(--cyan);color:#000;font-size:10px;font-weight:800}
-.storage{padding:12px;background:#11140f;border:1px solid var(--border);border-radius:14px;display:flex;flex-direction:column;gap:8px}
-.storage p{font-size:10px;letter-spacing:.8px;color:#5c6258}
-.bar{height:4px;border-radius:2px;background:#242922;overflow:hidden}
-.bar i{display:block;width:100%;height:100%;background:var(--cyan);border-radius:2px}
-.storage small{font-size:11px;font-weight:500;color:#8c9288}
-
-/* ---------- Top bar ---------- */
-.main{position:relative;z-index:1;margin-left:var(--sw);min-height:100vh;padding-bottom:150px}
-.topbar{position:sticky;top:0;z-index:4;display:flex;align-items:center;gap:10px;padding:12px var(--pad);background:rgba(0,0,0,.95);border-bottom:1px solid var(--line);backdrop-filter:blur(10px)}
-.menu-btn{display:flex;align-items:center;justify-content:center;width:40px;height:40px;flex:none;border:1px solid var(--border);border-radius:20px;background:var(--card);color:#92988d}
-.menu-btn:hover{border-color:#3a4333;color:var(--fg)}
-.search{display:flex;align-items:center;gap:12px;flex:1;min-width:0;max-width:340px;height:40px;padding:0 16px;background:#141713;border:1px solid var(--border);border-radius:9999px;color:#71766d}
-.search:focus-within{border-color:var(--cyan)}
-.search input{flex:1;min-width:0;background:none;border:0;outline:0;color:var(--fg);font:500 13px var(--font)}
-.search input::placeholder{color:#60665d}
-.top-actions{display:flex;align-items:center;gap:10px;margin-left:auto}
-.pill{display:none;align-items:center;gap:6px;height:36px;padding:6px 14px;background:#171b15;border:1px solid var(--border);border-radius:9999px;font-size:11px;font-weight:700;color:var(--muted)}
-.pill:hover{border-color:#39412f;color:var(--fg)}
-.avatar{width:38px;height:38px;border-radius:19px;background:var(--cyan);color:#10120e;font-size:12px;font-weight:800;filter:drop-shadow(0 2px 5px var(--glow))}
-.avatar:hover{filter:drop-shadow(0 2px 9px var(--glow)) brightness(1.08)}
-
-/* ---------- Content ---------- */
-.content{width:100%;max-width:1000px;margin:20px auto 0;padding:0 var(--pad);display:flex;flex-direction:column;gap:14px}
-.heading{display:flex;justify-content:space-between;align-items:flex-start;gap:24px}
-.heading>div{display:flex;flex-direction:column;gap:8px}
-.eyebrow{font-size:10px;font-weight:800;letter-spacing:1.8px;text-transform:uppercase;color:#676c63}
-h1{padding:1px 0 .8px;font-size:40px;font-weight:700;letter-spacing:-1.5px;line-height:44px}
-.sub{font-size:13px;color:var(--muted)}
-.round-btn{display:flex;align-items:center;justify-content:center;width:40px;height:40px;background:var(--card);border:1px solid var(--border);border-radius:20px;color:#92988d;flex:none}
-.round-btn:hover{border-color:#3a4333;color:var(--fg)}
-.tabs{display:flex;gap:8px;padding:14px 0 10px;overflow-x:auto;scrollbar-width:none}
-.tabs::-webkit-scrollbar{display:none}
-.tab{flex:none;padding:8px 18px;background:#141713;border:1px solid var(--border);border-radius:9999px;font-size:12px;font-weight:700;color:#82877e}
-.tab:hover{border-color:#3a4333;color:var(--fg)}
-.tab[aria-selected=true]{background:var(--cyan);border-color:var(--cyan);color:#10120d;filter:drop-shadow(0 4px 7px var(--glow))}
-.actionbar{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px 16px;padding-bottom:10px;border-bottom:1px solid var(--subtle)}
-.actions{display:flex;flex-wrap:wrap;gap:8px;width:100%}
-.btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:9.5px 15px;background:var(--card);border:1px solid var(--border);border-radius:14px;font-size:12px;font-weight:700;color:var(--dim)}
-.btn:hover{border-color:#3a4333;background:#1a1e17}
-.btn[aria-pressed=true]{border-color:var(--cyan);color:var(--cyan)}
-.btn-primary{padding:10px 18px;background:var(--cyan);border-color:var(--cyan);color:#10120c;font-weight:800;filter:drop-shadow(0 4px 8px var(--glow))}
-.btn-primary:hover{background:var(--cyan);filter:drop-shadow(0 4px 12px var(--glow)) brightness(1.08)}
-.total{margin-left:auto;font-size:12px;color:#6e746b;white-space:nowrap}
-
-/* ---------- Song list ---------- */
-.songs{list-style:none;padding:0}
-.row{display:flex;align-items:center;gap:10px;min-height:68px;padding:10px 8px;border-bottom:1px solid var(--subtle);border-radius:14px;transition:background .18s;cursor:pointer}
-.row:hover{background:#12150f}
-.row.is-active{background:#171c14;border-bottom-color:rgba(198,233,76,.2)}
-.row[hidden]{display:none}
-.num,.lang,.dur,.row .like{display:none}
-.num{width:32px;flex:none;text-align:center;font-size:12px;font-weight:600;color:#666c63}
-.info{flex:1 1 200px;max-width:331.33px;min-width:0;padding-left:2px;display:flex;flex-direction:column;gap:4px}
-.info strong{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.row.is-active .info strong{color:var(--cyan)}
-.info span{font-size:12px;color:var(--muted)}
-.lang{width:164.67px;flex:none;font-size:12px;color:#6a7165}
-.dur{width:50px;flex:none;text-align:right;font-size:12px;color:#6a7165}
-.icon-btn{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:18px;color:#6a7165;flex:none}
-.icon-btn:hover{background:rgba(255,255,255,.06);color:var(--fg)}
-.icon-btn.like[aria-pressed=true]{color:var(--cyan)}
-.icon-btn.like[aria-pressed=true] .ic{fill:currentColor}
-.row-play{display:flex;align-items:center;justify-content:center;width:36px;height:34px;margin-left:auto;padding-left:2px;background:#1d221a;border:1px solid #283023;border-radius:17px;color:var(--fg);flex:none}
-.row-play:hover{border-color:#3b4635;background:#232a1f}
-.row.is-active .row-play{width:37.36px;height:36.72px;padding:.08px .08px .08px .72px;background:var(--cyan);border-color:var(--cyan);color:#000;filter:drop-shadow(0 4px 6px var(--glow))}
-.row-play .ic{width:14px;height:14px}
-.row.is-active .row-play .ic{width:15.12px;height:15.12px}
-
-/* ---------- Artwork ---------- */
-.art{position:relative;display:block;overflow:hidden;width:42px;height:42px;flex:none;border-radius:12px;background:linear-gradient(140deg,var(--c,#a29bfe) 0%,#11140f 75%);box-shadow:0 4px 12px rgba(0,0,0,.4),inset 0 0 0 1px rgba(255,255,255,.12)}
-.art b{position:absolute;left:14%;top:14%;width:72%;aspect-ratio:1;border:1px solid rgba(255,255,255,.25);border-radius:36%}
-.art i{position:absolute;left:38%;top:38%;width:24%;aspect-ratio:1;background:rgba(18,20,16,.7);border:1px solid rgba(255,255,255,.3);border-radius:12%}
-.art em{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:12px;font-weight:800;letter-spacing:.6px;color:rgba(255,255,255,.8);text-shadow:0 1px 3px rgba(0,0,0,.8)}
-.art-52{width:52px;height:52px}
-
-/* ---------- Player (mobile: two rows) ---------- */
-.player{position:fixed;left:var(--sw);right:0;bottom:0;z-index:10;display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"left ctrl" "seek seek";align-items:center;gap:6px 12px;padding:10px var(--pad) 12px;background:rgba(0,0,0,.96);border-top:1px solid var(--line);box-shadow:0 -10px 40px rgba(0,0,0,.7);backdrop-filter:blur(12px)}
-.p-center{display:contents}
-.p-left{grid-area:left;display:flex;align-items:center;gap:10px;min-width:0}
-.p-meta{display:flex;flex-direction:column;gap:3px;min-width:0;flex:1 1 auto}
-.p-meta strong,.p-meta span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.p-meta strong{font-size:13px;font-weight:700}
-.p-meta span{font-size:11px;color:var(--muted)}
-.controls{grid-area:ctrl;display:flex;align-items:center;gap:6px}
-.icon-btn.sm,.icon-btn.txt{width:34px;height:34px;border-radius:17px;color:#8a9185}
-.icon-btn.sm[aria-pressed=true]{color:var(--cyan)}
-.icon-btn.txt{width:30px;font:400 20px/20px Inter,var(--font)}
-.play-main{display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:20px;background:var(--cyan);color:#000;filter:drop-shadow(0 4px 8px var(--glow))}
-.play-main:hover{filter:drop-shadow(0 4px 12px var(--glow)) brightness(1.08)}
-.seek{grid-area:seek;display:flex;align-items:center;gap:10px;width:100%}
-.time{min-width:32px;padding:0 4px;text-align:center;font-size:11px;font-weight:600;color:#747a70}
-.track{position:relative;flex:1;height:6px;min-width:0}
-.track img{position:absolute;inset:0;width:100%;height:6px;border-radius:4px}
-input[type=range]{-webkit-appearance:none;appearance:none;background:none;margin:0}
-.track input{position:absolute;left:0;right:0;top:-5px;width:100%;height:16px}
-.track input::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:8px;background:var(--cyan);box-shadow:0 0 10px var(--glow);border:0}
-.track input::-moz-range-thumb{width:16px;height:16px;border-radius:8px;background:var(--cyan);box-shadow:0 0 10px var(--glow);border:0}
-.p-right,.p-left .like,#bShuffle,#bRepeat{display:none}
-.p-right{grid-area:right;align-items:center;justify-content:flex-end;gap:10px;min-width:0}
-.vol{display:flex;align-items:center;gap:8px}
-.vbtn{width:32px;height:32px;border-radius:16px;color:#8a9185}
-.vol input{width:70px;height:16px;background:#3b3b3b;cursor:pointer}
-.vol input::-webkit-slider-thumb{-webkit-appearance:none;width:0;height:0}
-.vol input::-moz-range-thumb{width:0;height:0;border:0}
-
-/* ---------- >= 480px: show numbers + like buttons ---------- */
-@media(min-width:480px){
-  .num,.row .like{display:flex}
-  .row{gap:12px}
-  .actions .btn:nth-child(3){flex:0 0 auto}
-}
-
-/* ---------- >= 701px: tablet ---------- */
-@media(min-width:701px){
-  :root{--pad:24px}
-  .topbar{padding:14px var(--pad);gap:12px}
-  .pill{display:flex}
-  .content{margin-top:32px}
-  h1{font-size:48px;line-height:52.8px;letter-spacing:-1.92px}
-  .actions{width:auto}
-  .total{margin-left:0}
-  .row{gap:14px;min-height:72px;padding:12.5px 16px 12.5px 12px}
-  .art{width:46px;height:46px}
-  .player{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);grid-template-areas:"left ctrl right" "seek seek seek";gap:6px 16px;padding:10px 20px 12px}
-  .p-left .like,#bShuffle,#bRepeat{display:flex}
-  .p-right{display:flex}
-  .p-right .sm:not(#full){display:none}
-  .controls{gap:14px}
-  .icon-btn.txt{width:34px}
-  .p-meta{max-width:160px}
-}
-
-/* ---------- >= 1001px: laptop (fixed sidebar) ---------- */
-@media(min-width:1001px){
-  :root{--sw:250px;--pad:32px}
-  .menu-btn,.backdrop{display:none}
-  .sidebar{transform:none;visibility:visible;max-width:none;width:var(--sw)}
-  .search{height:42px;flex:0 0 340px}
-  .main{padding-bottom:120px}
-  .lang,.dur{display:block}
-  .player{display:flex;align-items:center;justify-content:space-between;gap:24px;height:88px;padding:0 28px;bottom:1.2px}
-  .p-left{width:320px;min-width:180px;gap:14px}
-  .p-center{display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;max-width:620px;padding:0 16px}
-  .controls{gap:18px}
-  .p-right{width:auto;min-width:0;flex:1}
-  .p-left{flex:1}
-  .vol input{width:90px}
-  .art-52 b{top:7.28px;border-radius:18.72px}.art-52 i{top:19.77px;border-radius:6.24px}
-}
-
-/* ---------- >= 1281px: desktop = Figma 1920 design ---------- */
-@media(min-width:1281px){
-  :root{--pad:96px}
-  .p-meta{width:90px}
-  .p-right .sm:not(#full){display:flex}
-}
-@media(prefers-reduced-motion:reduce){*{transition:none!important}}
-.empty{padding:32px 0;text-align:center;font-size:13px;color:var(--muted)}
-.empty[hidden]{display:none}
-
-</style>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
-<symbol id="i-search" viewBox="0 0 15 16"><g stroke-width="1.09575"><path d="M6.696 12.261a4.87 4.87 0 1 0 0-9.74 4.87 4.87 0 0 0 0 9.74ZM12.784 13.479l-2.648-2.648"/></g></symbol>
-<symbol id="i-eq" viewBox="0 0 14 14"><g stroke-width="1.16667"><path d="M2.333 12.25V8.167M2.333 5.833V1.75M7 12.25V7M7 4.667V1.75M11.667 12.25V9.333M11.667 7V1.75M.583 8.167h3.5M5.25 4.667h3.5M9.917 9.333h3.5"/></g></symbol>
-<symbol id="i-clock" viewBox="0 0 14 14"><g stroke-width="1.16667"><path d="M7 12.833A5.833 5.833 0 1 0 7 1.167a5.833 5.833 0 0 0 0 11.666ZM7 3.5V7l2.333 1.167"/></g></symbol>
-<symbol id="i-more" viewBox="0 0 18 18"><g stroke-width="1.5"><circle cx="9" cy="9" r=".75"/><circle cx="14.25" cy="9" r=".75"/><circle cx="3.75" cy="9" r=".75"/></g></symbol>
-<symbol id="i-upload" viewBox="0 0 16 16"><g stroke-width="1.33333"><path d="M8 10.667v-8M11.333 6 8 2.667 4.667 6M2.667 13.333h10.666"/></g></symbol>
-<symbol id="i-shuffle-d" viewBox="0 0 14 14"><g stroke-width="1.16667"><path d="M9.333 1.75h2.917v2.917M2.333 11.667 12.25 1.75M12.25 9.333v2.917H9.333M8.75 8.75l3.5 3.5"/></g></symbol>
-<symbol id="i-download" viewBox="0 0 14 14"><g stroke-width="1.16667"><path d="M12.25 8.75v2.333a1.167 1.167 0 0 1-1.167 1.167H2.917a1.167 1.167 0 0 1-1.167-1.167V8.75M4.083 5.833 7 8.75l2.917-2.917M7 8.75v-7"/></g></symbol>
-<symbol id="i-heart" viewBox="0 0 18 18"><g stroke-width="1.35"><path d="M15.6 6.525c0 4.125-6.6 7.725-6.6 7.725S2.4 10.65 2.4 6.525a3.4 3.4 0 0 1 .622-2.254 3.45 3.45 0 0 1 1.896-1.368 3.47 3.47 0 0 1 2.335.118A3.45 3.45 0 0 1 9 4.575a3.45 3.45 0 0 1 1.747-1.553 3.47 3.47 0 0 1 2.335-.119 3.45 3.45 0 0 1 1.896 1.368A3.4 3.4 0 0 1 15.6 6.525Z"/></g></symbol>
-<symbol id="i-play" viewBox="0 0 16 16"><path d="M5.04 3.15 11.97 7.56 5.04 11.97V3.15Z" fill="currentColor" stroke-width="1.26"/></symbol>
-<symbol id="i-pause" viewBox="0 0 16 16"><path d="M5 3.5v8M10.5 3.5v8" stroke-width="2"/></symbol>
-<symbol id="i-music" viewBox="0 0 18 18"><g stroke-width="1.35"><path d="M6.75 13.5V3.75L15 2.25V12M6.75 13.5a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0ZM15 12a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z"/></g></symbol>
-<symbol id="i-playcircle" viewBox="0 0 18 18"><g stroke-width="1.35"><path d="M9 16.5a7.5 7.5 0 1 0 0-15 7.5 7.5 0 0 0 0 15ZM7.5 6l4.5 3-4.5 3V6Z"/></g></symbol>
-<symbol id="i-playtri" viewBox="0 0 18 18"><g stroke-width="1.35"><path d="M3.75 2.25 14.25 9l-10.5 6.75V2.25Z"/></g></symbol>
-<symbol id="i-settings" viewBox="0 0 18 18"><g stroke-width="1.35"><circle cx="9" cy="9" r="2.25"/><path d="M14.55 11.25a1.24 1.24 0 0 0 .248 1.365l.045.045a1.504 1.504 0 1 1-2.123 2.123l-.045-.045a1.24 1.24 0 0 0-1.365-.248 1.24 1.24 0 0 0-.75 1.133v.127a1.5 1.5 0 0 1-3 0v-.068a1.24 1.24 0 0 0-.81-1.132 1.24 1.24 0 0 0-1.365.248l-.045.045a1.504 1.504 0 1 1-2.123-2.123l.045-.045a1.24 1.24 0 0 0 .248-1.365 1.24 1.24 0 0 0-1.133-.75H2.25a1.5 1.5 0 0 1 0-3h.068a1.24 1.24 0 0 0 1.132-.81 1.24 1.24 0 0 0-.248-1.365l-.045-.045a1.504 1.504 0 1 1 2.123-2.123l.045.045a1.24 1.24 0 0 0 1.365.248h.06a1.24 1.24 0 0 0 .75-1.133V2.25a1.5 1.5 0 0 1 3 0v.068a1.24 1.24 0 0 0 .75 1.132 1.24 1.24 0 0 0 1.365-.248l.045-.045a1.504 1.504 0 1 1 2.123 2.123l-.045.045a1.24 1.24 0 0 0-.248 1.365v.06a1.24 1.24 0 0 0 1.133.75h.127a1.5 1.5 0 0 1 0 3h-.068a1.24 1.24 0 0 0-1.132.75Z"/></g></symbol>
-<symbol id="i-shuffle" viewBox="0 0 16 16"><g stroke-width="1.2"><path d="M2 4h2c2.667 0 3.333 8 6 8h4M12 14l2-2-2-2M2 12h2c1 0 1.667-.8 2.333-2M10 4h4M12 6l2-2-2-2"/></g></symbol>
-<symbol id="i-repeat" viewBox="0 0 16 16"><g stroke-width="1.2"><path d="m11.333 6.667 2.667-2.667-2.667-2.667M14 4H4a2 2 0 0 0-2 2v1.333M4.667 9.333 2 12l2.667 2.667M2 12h10a2 2 0 0 0 2-2V8.667"/></g></symbol>
-<symbol id="i-bars" viewBox="0 0 15 15"><g stroke-width="1.125"><path d="M2.5 13.125V8.75M2.5 6.25V1.875M7.5 13.125V7.5M7.5 5V1.875M12.5 13.125V10M12.5 7.5V1.875"/></g></symbol>
-<symbol id="i-clock15" viewBox="0 0 15 15"><g stroke-width="1.125"><path d="M7.5 13.75a6.25 6.25 0 1 0 0-12.5 6.25 6.25 0 0 0 0 12.5ZM7.5 3.75V7.5l2.5 1.25"/></g></symbol>
-<symbol id="i-volume" viewBox="0 0 17 17"><g stroke-width="1.275"><path d="M7.792 3.542 4.25 6.375H1.417v4.25H4.25l3.542 2.833V3.542ZM11.008 5.993a3.5 3.5 0 0 1 0 5.008M13.508 3.492a7.05 7.05 0 0 1 0 10.016"/></g></symbol>
-<symbol id="i-mute" viewBox="0 0 17 17"><g stroke-width="1.275"><path d="M7.792 3.542 4.25 6.375H1.417v4.25H4.25l3.542 2.833V3.542ZM11 6l4 5M15 6l-4 5"/></g></symbol>
-<symbol id="i-expand" viewBox="0 0 16 16"><g stroke-width="1.2"><path d="M10 2h4v4M6 14H2v-4M14 2 9.333 6.667M2 14l4.667-4.667"/></g></symbol>
-</defs></svg>
-
-<div class="backdrop" id="backdrop" hidden></div>
-<nav class="sidebar" id="sidebar" aria-label="Sidebar navigation">
-  <div class="brand"><span class="logo" aria-hidden="true">MS</span></div>
-  <p class="eyebrow-nav">Your library</p>
-  <div class="nav" role="list">
-    <button class="nav-btn is-active" aria-current="page"><svg class="ic" width="18" height="18"><use href="#i-music"/></svg><span>All Tracks</span></button>
-    <button class="nav-btn"><svg class="ic" width="18" height="18"><use href="#i-playcircle"/></svg><span>Manya ‘s Playlist </span><span class="count">5</span></button>
-    <button class="nav-btn"><svg class="ic" width="18" height="18"><use href="#i-heart"/></svg><span>Liked Songs</span></button>
-    <button class="nav-btn"><svg class="ic" width="18" height="18"><use href="#i-playtri"/></svg><span>Now Playing</span></button>
+<aside class="side">
+  <div class="logo">MS</div>
+  <p class="lbl">YOUR LIBRARY</p>
+  <nav id="nav">
+    <button data-v="all" class="on"><i data-i="note"></i><span>All Tracks</span></button>
+    <button data-v="list"><i data-i="circleplay"></i><span>Manya ’ s Playlist</span><b>5</b></button>
+    <button data-v="liked"><i data-i="heart"></i><span>Liked Songs</span></button>
+    <button data-v="now"><i data-i="tri"></i><span>Now Playing</span></button>
+  </nav>
+  <div class="sbot">
+    <div class="eqbox"><span>Sound EQ</span><em>Flat</em></div>
+    <button class="plain"><i data-i="gear"></i><span>Settings</span></button>
+    <div class="store"><small>LIBRARY STORAGE</small><div class="meter"></div><small class="idx">5 tracks indexed</small></div>
   </div>
-  <div class="side-bottom">
-    <button class="eq-box" id="eqBox" aria-label="Sound EQ preset: Flat"><span>Sound EQ</span><span class="badge">Flat</span></button>
-    <button class="nav-btn"><svg class="ic" width="18" height="18"><use href="#i-settings"/></svg><span>Settings</span></button>
-    <div class="storage"><p>LIBRARY STORAGE</p><div class="bar"><i></i></div><small>38 tracks indexed</small></div>
-  </div>
-</nav>
+</aside>
 
-<main class="main">
-  <header class="topbar">
-    <button class="menu-btn" id="menuBtn" aria-label="Open navigation" aria-expanded="false" aria-controls="sidebar"><svg class="ic" width="18" height="18" viewBox="0 0 18 18" stroke-width="1.5"><path d="M3 5h12M3 9h12M3 13h12"/></svg></button>
-        <label class="search"><svg class="ic" width="15" height="16"><use href="#i-search"/></svg><input id="search" type="search" placeholder="Search your library..." aria-label="Search your library"></label>
-    <div class="top-actions">
-      <button class="pill"><svg class="ic" width="14" height="14"><use href="#i-eq"/></svg><span id="eqLabel">EQ: Flat</span></button>
-      <button class="pill"><svg class="ic" width="14" height="14"><use href="#i-clock"/></svg><span>Timer</span></button>
-      <button class="avatar" aria-label="Profile">MS</button>
+<main>
+  <header class="top">
+    <label class="search"><i data-i="search"></i><input id="q" type="search" placeholder="Search your library..."></label>
+    <div class="topr">
+      <button class="chip"><i data-i="eq"></i>EQ: Flat</button>
+      <button class="chip" id="timer"><i data-i="clock"></i><span id="timerT">Timer</span></button>
+      <button class="icon" id="theme" aria-label="Switch dark / light mode"></button>
+      <button class="avatar">MS</button>
     </div>
   </header>
 
-  <section class="content">
-    <div class="heading">
-      <div><p class="eyebrow">Collection / 2026</p><h1>All</h1><p class="sub" id="albumCount">5 tracks in this album</p></div>
-      <button class="round-btn" aria-label="More library options"><svg class="ic" width="18" height="18"><use href="#i-more"/></svg></button>
+  <section id="lib" class="wrap">
+    <div class="head">
+      <div><p class="eyebrow">COLLECTION / 2026</p><h1 id="ttl">All</h1><p class="sub" id="sub">5 tracks in this album</p></div>
+      <button class="icon round"><i data-i="dots"></i></button>
     </div>
-    <div class="tabs" role="tablist" aria-label="Filter row chips">
-      <button class="tab" role="tab" aria-selected="true">All</button><button class="tab" role="tab" aria-selected="false">Hindi</button><button class="tab" role="tab" aria-selected="false">Gujarati</button><button class="tab" role="tab" aria-selected="false">Devotional</button><button class="tab" role="tab" aria-selected="false">Liked Songs</button><button class="tab" role="tab" aria-selected="false">Recently Played</button>
+    <div class="chips" id="chips"></div>
+    <div class="actions">
+      <div><button class="btn pri"><i data-i="upload"></i>Scan folder</button>
+      <button class="btn" id="shufBtn"><i data-i="shuffle"></i>Shuffle</button>
+      <button class="btn"><i data-i="download"></i>Save for offline drive</button></div>
+      <span class="count" id="count">5 tracks</span>
     </div>
-    <div class="actionbar">
-      <div class="actions">
-        <button class="btn btn-primary"><svg class="ic" width="16" height="16"><use href="#i-upload"/></svg>Scan folder</button>
-        <button class="btn" id="shuffleAll"><svg class="ic" width="14" height="14"><use href="#i-shuffle-d"/></svg>Shuffle</button>
-        <button class="btn" id="offline" aria-pressed="false"><svg class="ic" width="14" height="14"><use href="#i-download"/></svg>Save for offline drive</button>
+    <div id="list"></div>
+  </section>
+
+  <section id="now" class="wrap now hidden">
+    <div class="nhead">
+      <button class="icon round" id="back" aria-label="Back to library"><i data-i="prev"></i></button>
+      <span class="eyebrow">NOW PLAYING</span>
+      <div><button class="icon round" id="share" aria-label="Share song"><i data-i="share"></i></button>
+      <button class="icon round likebtn" aria-label="Like song"><i data-i="heart"></i></button></div>
+    </div>
+    <div class="ngrid">
+      <div class="vinylwrap"><div class="vinyl" id="vinyl"><div class="ring"></div><div class="ring r2"></div><div class="disc"><i data-i="note"></i></div></div></div>
+      <div class="meta">
+        <p class="eyebrow">LISTENING NOW</p>
+        <h2 id="nTitle">Kesariya</h2>
+        <p class="album" id="nAlbum"></p>
+        <p class="tags" id="nTags"></p>
+        <p class="lyrics">♪ Lyrics not available for this track.</p>
+        <div class="seekrow"><input class="seek" type="range" min="0" max="1000" value="0" aria-label="Track progress">
+          <div class="times"><span class="tcur">0:00</span><span class="trem">-0:00</span></div></div>
+        <div class="ctrl big">
+          <button class="shufbtn" aria-label="Shuffle"><i data-i="shuffle"></i></button>
+          <button class="prevbtn" aria-label="Previous"><i data-i="prev"></i></button>
+          <button class="ppbtn" aria-label="Play or pause"></button>
+          <button class="nextbtn" aria-label="Next"><i data-i="next"></i></button>
+          <button class="repbtn" aria-label="Repeat"><i data-i="repeat"></i></button>
+        </div>
+        <div class="tools">
+          <div class="volbox"><button class="mute" aria-label="Mute"></button><input class="vol" type="range" min="0" max="100" value="100" aria-label="Volume"></div>
+          <button class="pill speed">1.0x</button><button class="pill">Flat EQ</button>
+        </div>
       </div>
-      <span class="total">38 tracks</span>
     </div>
-    <ul class="songs" id="songs"></ul>
-    <p class="empty" id="empty" hidden>No tracks to show.</p>
   </section>
 </main>
 
-<footer class="player" aria-label="Audio player">
-  <div class="p-left">
-    <span class="art art-52" id="pArt" aria-hidden="true"><b></b><i></i><em>T0</em></span>
-    <div class="p-meta"><strong id="pTitle">Track 01</strong><span id="pSub">Jivan Ni Pagdhare</span></div>
-    <button class="icon-btn like" id="pLike" aria-pressed="false" aria-label="Like current song"><svg class="ic" width="18" height="18"><use href="#i-heart"/></svg></button>
-  </div>
-  <div class="p-center">
-    <div class="controls">
-      <button class="icon-btn sm" id="bShuffle" aria-pressed="false" aria-label="Toggle shuffle"><svg class="ic" width="16" height="16"><use href="#i-shuffle"/></svg></button>
-      <button class="icon-btn txt" id="bPrev" aria-label="Previous track">‹</button>
-      <button class="play-main" id="bPlay" aria-label="Play"><svg class="ic" width="20" height="20"><use href="#i-play"/></svg></button>
-      <button class="icon-btn txt" id="bNext" aria-label="Next track">›</button>
-      <button class="icon-btn sm" id="bRepeat" aria-pressed="false" aria-label="Toggle repeat"><svg class="ic" width="16" height="16"><use href="#i-repeat"/></svg></button>
+<footer class="bar" id="bar">
+  <div class="binfo"><div class="bthumb"><i data-i="note"></i></div>
+    <div class="btext"><strong id="bTitle">Select a song</strong><small id="bCat">Hindi</small></div>
+    <button class="icon likebtn" aria-label="Like current song"><i data-i="heart"></i></button></div>
+  <div class="bmid">
+    <div class="ctrl">
+      <button class="shufbtn" aria-label="Shuffle"><i data-i="shuffle"></i></button>
+      <button class="prevbtn" aria-label="Previous"><i data-i="prev"></i></button>
+      <button class="ppbtn" aria-label="Play or pause"></button>
+      <button class="nextbtn" aria-label="Next"><i data-i="next"></i></button>
+      <button class="repbtn" aria-label="Repeat"><i data-i="repeat"></i></button>
     </div>
-    <div class="seek"><span class="time" id="tCur">0:00</span><div class="track"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAe8AAAAGCAYAAADqtRYzAAAWfmNhQlgAABZ+anVtYgAAAB5qdW1kYzJwYQARABCAAACqADibcQNjMnBhAAAAFlhqdW1iAAAAR2p1bWRjMm1hABEAEIAAAKoAOJtxA3VybjpjMnBhOjQ3ZGZhNzZhLTQwNTYtNGQ5Yy1hMTE5LWMzMmM0NjYwZTY0ZAAAAAOTanVtYgAAAClqdW1kYzJhcwARABCAAACqADibcQNjMnBhLmFzc2VydGlvbnMAAAAAuGp1bWIAAABEanVtZGNib3IAEQAQgAAAqgA4m3ETYzJwYS5pbmdyZWRpZW50LnYzAAAAABhjMnNouT0jBEu2igE2TQKjOKKMFAAAAGxjYm9yo2lkYzpmb3JtYXRpaW1hZ2UvcG5namluc3RhbmNlSUR4LHhtcDppaWQ6YjNkZDc3MDAtYmE1Mi00M2IyLTk5M2MtOGM2MmFjMmE1ZGIxbHJlbGF0aW9uc2hpcGhwYXJlbnRPZgAAAeJqdW1iAAAAQWp1bWRjYm9yABEAEIAAAKoAOJtxE2MycGEuYWN0aW9ucy52MgAAAAAYYzJzaBo13pOiaIyz4twXuK6Y5u8AAAGZY2JvcqJnYWN0aW9uc4KiZmFjdGlvbmtjMnBhLm9wZW5lZGpwYXJhbWV0ZXJzoWtpbmdyZWRpZW50c4GiY3VybHgtc2VsZiNqdW1iZj1jMnBhLmFzc2VydGlvbnMvYzJwYS5pbmdyZWRpZW50LnYzZGhhc2hYIFrUAELmRNE/Igg3vbVHsyD1vKE+RMjlaboXFOQq6NUcpGZhY3Rpb254HWNvbS5hbnRocm9waWMuY2xhdWRlLnByb3ZpZGVkanBhcmFtZXRlcnOheB9jb20uYW50aHJvcGljLm9yaWdpbi1jb25maWRlbmNlZ3Vua25vd25rZGVzY3JpcHRpb254ZkNsYXVkZSBwcm92aWRlZCB0aGlzIGZpbGUgYXQgdGhlIHJlcXVlc3Qgb2YgYSB1c2VyIGFuZCBtYXkgaGF2ZSBjcmVhdGVkIG9yIG1vZGlmaWVkIHRoZSBmaWxlIGNvbnRlbnRzLm1zb2Z0d2FyZUFnZW50oWRuYW1lZkNsYXVkZXJhbGxBY3Rpb25zSW5jbHVkZWT1AAAAyGp1bWIAAABAanVtZGNib3IAEQAQgAAAqgA4m3ETYzJwYS5oYXNoLmRhdGEAAAAAGGMyc2ht11c8ery0ud/VOf3CBDloAAAAgGNib3KlY2FsZ2ZzaGEyNTZjcGFkTQAAAAAAAAAAAAAAAABkaGFzaFggWmfx1xo6oFIR1MrBronXz/GdvIT71yCvJnFuQmijHm1kbmFtZW5qdW1iZiBtYW5pZmVzdGpleGNsdXNpb25zgaJlc3RhcnQYIWZsZW5ndGgZFooAAAI+anVtYgAAACdqdW1kYzJjbAARABCAAACqADibcQNjMnBhLmNsYWltLnYyAAAAAg9jYm9ypWNhbGdmc2hhMjU2aXNpZ25hdHVyZXhNc2VsZiNqdW1iZj0vYzJwYS91cm46YzJwYTo0N2RmYTc2YS00MDU2LTRkOWMtYTExOS1jMzJjNDY2MGU2NGQvYzJwYS5zaWduYXR1cmVqaW5zdGFuY2VJRHgseG1wOmlpZDpkMDgxZWYyYy05ZDY2LTQ4YjUtOTQwMC1mNGU1NTJkMDQ3ZTRyY3JlYXRlZF9hc3NlcnRpb25zg6JjdXJseC1zZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmluZ3JlZGllbnQudjNkaGFzaFggWtQAQuZE0T8iCDe9tUezIPW8oT5EyOVpuhcU5Cro1RyiY3VybHgqc2VsZiNqdW1iZj1jMnBhLmFzc2VydGlvbnMvYzJwYS5hY3Rpb25zLnYyZGhhc2hYIMUI4tNHMQi9EHn7fjaOkwgFVt0f86nl1dAsJeiqOfEPomN1cmx4KXNlbGYjanVtYmY9YzJwYS5hc3NlcnRpb25zL2MycGEuaGFzaC5kYXRhZGhhc2hYIJDM8PCv1yeWNy4UXDbNolFHs4nbDrp7Zus0fkClTCn/dGNsYWltX2dlbmVyYXRvcl9pbmZvo2RuYW1lb0FudGhyb3BpYyBGaWxlc2d2ZXJzaW9uZTEuMC4wa3NwZWNWZXJzaW9uZTIuNC4wAAAQOGp1bWIAAAAoanVtZGMyY3MAEQAQgAAAqgA4m3EDYzJwYS5zaWduYXR1cmUAAAAQCGNib3LShFkCEqIBJhghWQIKMIICBjCCAY2gAwIBAgIUQOWgCu7COdC+uIP6BkIFPWdVEwAwCgYIKoZIzj0EAwMwSTEXMBUGA1UEChMOQW50aHJvcGljLCBQQkMxLjAsBgNVBAMTJUFudGhyb3BpYyBDb250ZW50IENyZWRlbnRpYWxzIFJvb3QgQ0EwHhcNMjYwODA3MTg0MzU2WhcNMjgwODA2MTk0MzU2WjBEMRcwFQYDVQQKEw5BbnRocm9waWMsIFBCQzEpMCcGA1UEAxMgQW50aHJvcGljIENsYXVkZSBDb250ZW50IFNpZ25pbmcwWTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAASYegpry1AYBRTVNL1CpTlbROnY3dey+UrsF9C3phYrATN3ZHf93Mo8RQN0KOUuOn19P4oWNFWe5n2/She9N7eTo1gwVjAOBgNVHQ8BAf8EBAMCB4AwFQYDVR0lBA4wDAYKKwYBBAGD6F4CATAMBgNVHRMBAf8EAjAAMB8GA1UdIwQYMBaAFM5R4gSBTmRbI/jjxM+aPpzB11zCMAoGCCqGSM49BAMDA2cAMGQCMDFzHRSeAXrSy1WOzkbhPZ6Km2wGTmZ/2gK18k8BQGXyqz88Rdrz6CTX9flAnYNVxgIwcF9c3fVhqmJKpi+UhasNUMko69cyX6STPfta3Q8EjyzDjzoyrol46FP6VFHhvUcJoWNwYWRZDZ4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2WED61Mnp+DHhpnXFEzybo4BFnSwiG1NNAv22NscMQoZpfmMohJxMuSAzcuqQ9Ip4nGEGbiZSoDcTS8uh/h+UIaO9miMwNwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAFzUkdCAK7OHOkAAAAEZ0FNQQAAsY8L/GEFAAAADnRFWHRTb2Z0d2FyZQBGaWdtYZ6xlmMAAADKSURBVHgB7dktbgJBAIbhb4bQUIfqKZrKmqomNRXVDaIcgBNVo3BYBFcgwfEjYAUhIZAsfyHLDrPD3oFBkLyP/C7wideo9Nd6+zkcQ1sKdUWQnbxWy1z79CIAABDF1hemkUySnmm2Xn/3R3UUWbpxWswzAQCAeHwwn7Y87n/dQbVq9VQzAgAA8VRs6FoBAICHYuvPoak7cK5QngUBAIB4vEyjMhysp+8fL+Nzrq9yq+lGFxd02DntUq9zVggAANyuDNFbE8z3bJT0rxSHRd8LKvYaAAAAAElFTkSuQmCC" alt=""><input id="seek" type="range" min="0" max="100" value="0" aria-label="Track progress"></div><span class="time" id="tRem">-0:00</span></div>
+    <div class="seekline"><span class="tcur">0:00</span><input class="seek" type="range" min="0" max="1000" value="0" aria-label="Track progress"><span class="trem">-0:00</span></div>
   </div>
-  <div class="p-right">
-    <button class="icon-btn sm" aria-label="Equalizer"><svg class="ic" width="15" height="15"><use href="#i-bars"/></svg></button>
-    <button class="icon-btn sm" aria-label="Sleep timer"><svg class="ic" width="15" height="15"><use href="#i-clock15"/></svg></button>
-    <div class="vol"><button class="icon-btn vbtn" id="mute" aria-pressed="false" aria-label="Mute or unmute"><svg class="ic" width="17" height="17"><use href="#i-volume"/></svg></button><input id="vol" type="range" min="0" max="100" value="100" aria-label="Volume level"></div>
-    <button class="icon-btn sm" id="full" aria-label="View fullscreen"><svg class="ic" width="16" height="16"><use href="#i-expand"/></svg></button>
+  <div class="bright">
+    <button class="icon" id="openNow" aria-label="Open Now Playing"><i data-i="eq"></i></button>
+    <button class="icon"><i data-i="clock"></i></button>
+    <button class="icon mute" aria-label="Mute"></button><input class="vol" type="range" min="0" max="100" value="100" aria-label="Volume">
+    <button class="icon" id="full"><i data-i="expand"></i></button>
   </div>
 </footer>
-<script>
-(() => {
-  'use strict';
-  const $ = (s, r = document) => r.querySelector(s);
-  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
-  const tracks = [
-    { n: '01', t: 'Kesariya ( From” Brahmastra”)', l: 'Hindi', c: '#a29bfe' },
-    { n: '02', t: 'Tu khub mane game che', l: 'Devotional', c: '#fd79a8' },
-    { n: '03', t: 'Khalasi', l: 'Gujarati', c: '#c6e94c' },
-    { n: '04', t: 'Booma Boom', l: 'Gujarati', c: '#b7d93e' },
-    { n: '05', t: 'Chaleya ( From “Jawan “)', l: 'Hindi', c: '#7b6fd6' }
-  ];
-  const list = $('#songs');
-  const audio = new Audio();
-  const played = new Set(); let tab = 'All', query = '';
-  let cur = 0, playing = false, shuffle = false, repeat = false;
 
-  list.innerHTML = tracks.map((k, i) => `
-    <li class="row${i === 0 ? ' is-active' : ''}" data-i="${i}" tabindex="0">
-      <span class="num">${k.n}</span>
-      <span class="art" style="--c:${k.c}" aria-hidden="true"><b></b><i></i><em>T0</em></span>
-      <div class="info"><strong>${k.t}</strong><span>Manya’s Playlist</span></div>
-      <span class="lang">${k.l}</span><span class="dur">—</span>
-      <button class="icon-btn like" aria-pressed="false" aria-label="Like song"><svg class="ic" width="18" height="18"><use href="#i-heart"/></svg></button>
-      <button class="row-play" aria-label="Play Track ${k.n}"><svg class="ic" width="14" height="14"><use href="#i-play"/></svg></button>
-    </li>`).join('');
-  const rows = $$('.row', list);
-
-  const fmt = s => isFinite(s) ? Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart(2, '0') : '0:00';
-  function render() {
-    rows.forEach((r, i) => {
-      r.classList.toggle('is-active', i === cur);
-      $('.row-play use', r).setAttribute('href', i === cur && playing ? '#i-pause' : '#i-play');
-    });
-    const k = tracks[cur];
-    $('#pTitle').textContent = k.t;
-    $('#pArt').style.setProperty('--c', k.c);
-    $('#pLike').setAttribute('aria-pressed', $('.like', rows[cur]).getAttribute('aria-pressed'));
-    $('#bPlay use').setAttribute('href', playing ? '#i-pause' : '#i-play');
-    $('#bPlay').setAttribute('aria-label', playing ? 'Pause' : 'Play');
-  }
-  function select(i, play) {
-    cur = (i + tracks.length) % tracks.length;
-    if (play !== undefined) playing = play;
-    if (playing) played.add(cur);
-    render(); applyFilter();
-  }
-  const next = () => select(shuffle ? Math.floor(Math.random() * tracks.length) : cur + 1);
-  rows.forEach((r, i) => {
-    const toggle = () => select(i, i === cur ? !playing : true);
-    r.addEventListener('click', e => {
-      const like = e.target.closest('.like');
-      if (like) { like.setAttribute('aria-pressed', like.getAttribute('aria-pressed') !== 'true'); if (i === cur) render(); applyFilter(); return; }
-      toggle();
-    });
-    r.addEventListener('keydown', e => { if (e.target === r && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); toggle(); } });
-  });
-  $('#bPlay').onclick = () => { playing = !playing; if (playing) played.add(cur); render(); applyFilter(); };
-  $('#bNext').onclick = next;
-  $('#bPrev').onclick = () => select(cur - 1);
-  $('#pLike').onclick = () => $('.like', rows[cur]).click();
-  const flip = (b, f) => b.addEventListener('click', () => { const on = b.getAttribute('aria-pressed') !== 'true'; b.setAttribute('aria-pressed', on); f(on); });
-  flip($('#bShuffle'), v => shuffle = v);
-  flip($('#bRepeat'), v => repeat = v);
-  flip($('#offline'), () => {});
-  flip($('#mute'), m => { $('#mute use').setAttribute('href', m ? '#i-mute' : '#i-volume'); audio.muted = m; });
-  $('#shuffleAll').onclick = () => select(Math.floor(Math.random() * tracks.length), true);
-  $('#vol').oninput = e => { audio.volume = e.target.value / 100; };
-  $('#seek').oninput = e => { if (audio.duration) audio.currentTime = audio.duration * e.target.value / 100; };
-  audio.ontimeupdate = () => {
-    $('#tCur').textContent = fmt(audio.currentTime);
-    $('#tRem').textContent = '-' + fmt(audio.duration - audio.currentTime);
-    $('#seek').value = audio.duration ? audio.currentTime / audio.duration * 100 : 0;
-  };
-  audio.onended = () => repeat ? (audio.currentTime = 0, audio.play()) : next();
-  $('#full').onclick = () => document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen?.();
-  function applyFilter() {
-    let n = 0;
-    rows.forEach((r, i) => {
-      const k = tracks[i], liked = $('.like', r).getAttribute('aria-pressed') === 'true';
-      const byTab = tab === 'All' || tab === k.l || (tab === 'Liked Songs' && liked) || (tab === 'Recently Played' && played.has(i));
-      const byText = !query || (k.t + ' ' + k.l).toLowerCase().includes(query);
-      r.hidden = !(byTab && byText); n += !r.hidden;
-    });
-    $('#albumCount').textContent = n + (n === 1 ? ' track' : ' tracks') + ' in this album';
-    $('#empty').hidden = n > 0;
-  }
-  $$('.tab').forEach(t => t.addEventListener('click', () => {
-    tab = t.textContent.trim(); $('h1').textContent = tab;
-    $$('.tab').forEach(x => x.setAttribute('aria-selected', x === t)); applyFilter();
-  }));
-  $$('.nav .nav-btn').forEach(b => b.addEventListener('click', () => $$('.nav .nav-btn').forEach(x => { x.classList.toggle('is-active', x === b); x.toggleAttribute('aria-current', x === b); })));
-  $('#search').addEventListener('input', e => { query = e.target.value.trim().toLowerCase(); applyFilter(); });
-  const side = $('#sidebar'), mb = $('#menuBtn'), bd = $('#backdrop');
-  const menu = open => {
-    side.classList.toggle('is-open', open); bd.hidden = !open;
-    mb.setAttribute('aria-expanded', open);
-    mb.setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation');
-    document.body.classList.toggle('no-scroll', open);
-    (open ? $('.nav-btn', side) : mb).focus();
-  };
-  mb.onclick = () => menu(!side.classList.contains('is-open'));
-  bd.onclick = () => menu(false);
-  document.addEventListener('keydown', e => { if (e.key === 'Escape' && side.classList.contains('is-open')) menu(false); });
-  $$('.nav-btn', side).forEach(b => b.addEventListener('click', () => { if (side.classList.contains('is-open')) menu(false); }));
-  matchMedia('(min-width:1001px)').addEventListener('change', e => { if (e.matches && side.classList.contains('is-open')) menu(false); });
-  render();
-})();
+<div id="toast" class="toast"></div>
+<audio id="au" preload="metadata"></audio>
 <script src="songs.js"></script>
 <script src="script.js"></script>
-</script>
 </body>
 </html>
